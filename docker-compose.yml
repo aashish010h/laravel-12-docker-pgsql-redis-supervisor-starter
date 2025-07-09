@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # PHP Application Service
+  app:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile
+      target: prod  # Uses production build target from Dockerfile
+      args:
+        WWWUSER: ${WWWUSER}  # User ID from environment variables
+        WWWGROUP: ${WWWGROUP}  # Group ID from environment variables
+    container_name: l12-app
+    restart: always  # Automatically restart if container fails
+    working_dir: /var/www  # Default working directory
+    volumes:
+      - .:/var/www:cached  # Mount project directory
+      - .docker/php/supervisord.conf:/etc/supervisord.conf  # Supervisor config
+      - .docker/php/supervisor.conf:/etc/supervisor/conf.d/supervisor.conf  # Supervisor programs
+    depends_on:
+      - postgres  # Wait for database to start
+      - redis  # Wait for redis to start
+    networks:
+      - laravel-12-network
+
+  # NGINX Web Server
+  nginx:
+    image: nginx:alpine  # Lightweight NGINX image
+    container_name: l12-nginx
+    restart: always
+    ports:
+      - "81:81"  # Map host port 81 to container port 81
+    volumes:
+      - .:/var/www  # Project files
+      - .docker/nginx/default.conf:/etc/nginx/conf.d/default.conf  # NGINX config
+    depends_on:
+      - app  # Wait for PHP app to start
+    networks:
+      - laravel-12-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine  # PostgreSQL 16 with Alpine Linux
+    container_name: l12-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}  # Database name from .env
+      POSTGRES_USER: ${DB_USERNAME}  # Database user from .env
+      POSTGRES_PASSWORD: ${DB_PASSWORD}  # Database password from .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data  # Persistent database storage
+    networks:
+      - laravel-12-network
+
+  # Redis Cache
+  redis:
+    image: redis:alpine  # Lightweight Redis image
+    container_name: l12-redis
+    restart: always
+    volumes:
+      - redis_data:/data  # Persistent Redis storage
+    networks:
+      - laravel-12-network
+
+# Persistent volumes for database and cache
+volumes:
+  pg_data:  # PostgreSQL data volume
+  redis_data:  # Redis data volume
+
+# Docker network configuration
+networks:
+  laravel-12-network:
+    driver: bridge  # Creates an isolated network for these services
