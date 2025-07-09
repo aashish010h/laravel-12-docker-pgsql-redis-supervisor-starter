@@ -62,4 +62,4 @@ make npm run dev
 
 ---
 
-
+Note: Took Help from https://github.com/m1n64 Repository for starter.
