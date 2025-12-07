@@ -1,5 +1,5 @@
 # Use official PHP 8.4 FPM Alpine image as base
-FROM php:8.4-fpm-alpine AS base
+FROM php:8.3-fpm-alpine AS base
 
 # Environment variables
 ENV NODE_VERSION=22.0.0

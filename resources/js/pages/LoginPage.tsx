@@ -2,12 +2,15 @@ import React, { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginSchemaType } from "../schemas/loginSchema";
-import { loginUser } from "@/services/authService";
+import { login } from "@/services/authService";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useNavigate } from "react-router";
+import { getErrorMessage } from "@/lib/helper";
 
 const LoginPage: FC = () => {
     const [serverError, setServerError] = useState("");
-    const {setUser} = useAuthStore()
+    const navigate = useNavigate();
+    const { setUser } = useAuthStore();
     const {
         register,
         handleSubmit,
@@ -19,12 +22,12 @@ const LoginPage: FC = () => {
     const onSubmit = async (data: LoginSchemaType) => {
         setServerError("");
         try {
-            const userData = await loginUser(data);
-            setUser(userData); // store  user in Zustand
-            console.log("Logged in:", userData);
+            const userData = await login(data);
+            setUser(userData);
+            localStorage.setItem("token", userData.token);
+            navigate("dashboard");
         } catch (err: unknown) {
-            if (err instanceof Error) setServerError(err.message);
-            else setServerError("Something went wrong");
+            setServerError(getErrorMessage(err));
         }
     };
     return (
@@ -42,7 +45,9 @@ const LoginPage: FC = () => {
                     <form onSubmit={handleSubmit(onSubmit)}>
                         {/* Email */}
                         <div className="mb-3">
-                            <label className="form-label">Email</label>
+                            <label className="form-label">
+                                Email (admin@admin.com)
+                            </label>
                             <input
                                 type="email"
                                 className={`form-control ${
@@ -60,7 +65,9 @@ const LoginPage: FC = () => {
 
                         {/* Password */}
                         <div className="mb-3">
-                            <label className="form-label">Password</label>
+                            <label className="form-label">
+                                Password (password)
+                            </label>
                             <input
                                 type="password"
                                 className={`form-control ${

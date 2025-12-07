@@ -1,4 +1,4 @@
-import axiosInstance from "@/services/axios";
+import axiosInstance from "@/services/axiosInstance";
 import { create } from "zustand";
 
 interface User {

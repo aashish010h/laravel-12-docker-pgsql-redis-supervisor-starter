@@ -4,6 +4,8 @@ import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardHome from "@/pages/DashboardHome";
+import FileList from "@/pages/Files/FileList";
+import FileAdd from "@/pages/Files/FileAdd";
 //import ProtectedRoute from "./ProtectedRoutes";
 
 const router = createBrowserRouter([
@@ -15,11 +17,15 @@ const router = createBrowserRouter([
     {
         path: "/dashboard",
         element: (
-           // <ProtectedRoute>
-                <DashboardLayout />
-           // </ProtectedRoute>
+            // <ProtectedRoute>
+            <DashboardLayout />
+            // </ProtectedRoute>
         ),
-        children: [{ index: true, element: <DashboardHome /> }],
+        children: [
+            { index: true, element: <DashboardHome /> },
+            { path: "files", element: <FileList /> },
+            { path: "files/store", element: <FileAdd /> },
+        ],
     },
 ]);
 
